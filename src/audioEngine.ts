@@ -19,7 +19,7 @@ export class AudioEngine {
     }
 
     playTypingSound() {
-        if (!this.ctx) return;
+        if (!this.ctx || this.weaponType === 'none') return;
 
         if (this.weaponType === 'sword') {
             // 검 휘두르는 소리 (짧은 슬라이드 다운)
@@ -34,7 +34,7 @@ export class AudioEngine {
     }
 
     playHeartbeat() {
-        if (!this.ctx) return;
+        if (!this.ctx || this.weaponType === 'none') return;
         const now = this.ctx.currentTime;
         if (now - this.lastHeartbeat < 0.5) return; // 너무 자주 재생 방지
         this.lastHeartbeat = now;
@@ -47,7 +47,7 @@ export class AudioEngine {
     }
 
     playDeathSound() {
-        if (!this.ctx) return;
+        if (!this.ctx || this.weaponType === 'none') return;
 
         // 폭발/글자 파괴 소리 (노이즈 흉내)
         for (let i = 0; i < 20; i++) {
@@ -58,7 +58,7 @@ export class AudioEngine {
     }
 
     playClearSound() {
-        if (!this.ctx) return;
+        if (!this.ctx || this.weaponType === 'none') return;
         // 빰빰빰
         this.playTone(440, 440, 'triangle', 0.2, 0.05, 0.5);
         setTimeout(() => this.playTone(554, 554, 'triangle', 0.2, 0.05, 0.5), 200);
