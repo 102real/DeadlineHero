@@ -10,7 +10,13 @@ const screenResult = document.getElementById('screen-result') as HTMLElement;
 
 const questForm = document.getElementById('quest-form') as HTMLFormElement;
 const goalInput = document.getElementById('goal-words') as HTMLInputElement;
+const goalMinutesInput = document.getElementById('goal-minutes') as HTMLInputElement;
 const weaponSelect = document.getElementById('weapon-sound') as HTMLSelectElement;
+
+const tabChars = document.getElementById('tab-chars') as HTMLButtonElement;
+const tabTime = document.getElementById('tab-time') as HTMLButtonElement;
+const goalCharsGroup = document.getElementById('goal-chars-group') as HTMLElement;
+const goalTimeGroup = document.getElementById('goal-time-group') as HTMLElement;
 
 const textEditor = document.getElementById('text-editor') as HTMLElement;
 const bossHpBar = document.getElementById('boss-hp-bar') as HTMLElement;
@@ -24,6 +30,7 @@ const idleTimerLabel = document.getElementById('idle-timer-label') as HTMLElemen
 const resultTitle = document.getElementById('result-title') as HTMLElement;
 const resultDesc = document.getElementById('result-desc') as HTMLElement;
 const survivingText = document.getElementById('surviving-text') as HTMLElement;
+const survivingTextContainer = document.getElementById('surviving-text-container') as HTMLElement;
 const btnRetry = document.getElementById('btn-retry') as HTMLButtonElement;
 const btnCopy = document.getElementById('btn-copy') as HTMLButtonElement;
 const btnDownload = document.getElementById('btn-download') as HTMLButtonElement;
@@ -32,9 +39,14 @@ const btnDownload = document.getElementById('btn-download') as HTMLButtonElement
 // Game State
 // ================================================
 type GameState = 'menu' | 'playing' | 'gameover' | 'clear';
+type QuestType = 'chars' | 'time';
+
 let currentState: GameState = 'menu';
+let questType: QuestType = 'chars';
 
 let targetWords = 100;
+let goalMinutes = 10;
+let gameStartTime = 0;
 let currentWords = 0;
 let tension = 0;
 let maxIdleTime = 10000;
@@ -78,6 +90,27 @@ function getDifficultyValue(): string {
 }
 
 // ================================================
+// Quest Type Toggle
+// ================================================
+function setQuestType(type: QuestType) {
+    questType = type;
+    if (type === 'chars') {
+        tabChars.classList.add('quest-tab--active');
+        tabTime.classList.remove('quest-tab--active');
+        goalCharsGroup.style.display = '';
+        goalTimeGroup.style.display = 'none';
+    } else {
+        tabTime.classList.add('quest-tab--active');
+        tabChars.classList.remove('quest-tab--active');
+        goalTimeGroup.style.display = '';
+        goalCharsGroup.style.display = 'none';
+    }
+}
+
+tabChars.addEventListener('click', () => setQuestType('chars'));
+tabTime.addEventListener('click', () => setQuestType('time'));
+
+// ================================================
 // Timer Bar Update
 // ================================================
 function updateTimerBar(idleTime: number) {
@@ -118,9 +151,20 @@ function resetTimerBar() {
 // HUD Updates
 // ================================================
 function updateHUD() {
-    const ratio = Math.min(1, currentWords / targetWords);
-    bossHpBar.style.width = `${(1 - ratio) * 100}%`;
-    progressText.innerText = `${currentWords} / ${targetWords} 자`;
+    if (questType === 'chars') {
+        const ratio = Math.min(1, currentWords / targetWords);
+        bossHpBar.style.width = `${(1 - ratio) * 100}%`;
+        progressText.innerText = `${currentWords} / ${targetWords} 자`;
+    } else {
+        const elapsed = Date.now() - gameStartTime;
+        const goalMs = goalMinutes * 60 * 1000;
+        const ratio = Math.min(1, elapsed / goalMs);
+        bossHpBar.style.width = `${(1 - ratio) * 100}%`;
+        const remaining = Math.max(0, goalMs - elapsed);
+        const m = Math.floor(remaining / 60000);
+        const s = Math.floor((remaining % 60000) / 1000);
+        progressText.innerText = `${m}:${s.toString().padStart(2, '0')} 남음`;
+    }
 }
 
 function updateTensionBar() {
@@ -142,7 +186,9 @@ function startGame(e: Event) {
     e.preventDefault();
 
     targetWords = parseInt(goalInput.value) || 100;
+    goalMinutes = Math.max(1, parseInt(goalMinutesInput.value) || 10);
     maxIdleTime = getDifficultyValue() === 'hardcore' ? 5000 : 10000;
+    gameStartTime = Date.now();
 
     currentWords = 0;
     tension = 0;
@@ -186,6 +232,16 @@ function gameLoop() {
     const idleRatio = Math.min(1, idleTime / maxIdleTime);
     engine.update(idleRatio);
     updateTimerBar(idleTime);
+
+    // Time mode: update HUD every tick and check for clear
+    if (questType === 'time') {
+        updateHUD();
+        const elapsed = now - gameStartTime;
+        if (elapsed >= goalMinutes * 60 * 1000) {
+            gameClear(textEditor.innerText);
+            return;
+        }
+    }
 
     const warn1 = maxIdleTime * 0.5;
     const warn2 = maxIdleTime * 0.7;
@@ -235,7 +291,7 @@ function handleTyping() {
     updateTensionBar();
     updateHUD();
 
-    if (currentWords >= targetWords) {
+    if (questType === 'chars' && currentWords >= targetWords) {
         gameClear(text);
     }
 }
@@ -308,11 +364,7 @@ function gameOver(reason: 'timeout' | 'focus_lost') {
     engine.reset();
     textEditor.style.visibility = 'visible';
 
-    const preview = savedText.length > 0
-        ? savedText.slice(-120).trim()
-        : '(없음)';
-
-    survivingText.innerText = preview;
+    survivingTextContainer.style.display = 'none';
 
     resultTitle.innerText = '게임 오버';
     resultDesc.innerText = reason === 'timeout'
@@ -345,9 +397,15 @@ function gameClear(text: string) {
     }
 
     survivingText.innerText = text.slice(-120).trim() || text;
+    survivingTextContainer.style.display = 'block';
 
     resultTitle.innerText = '임무 완수!';
-    resultDesc.innerText = '마감 몬스터를 성공적으로 물리쳤습니다.\n글이 세계를 구원했습니다.';
+    if (questType === 'time') {
+        const totalChars = getCharCount(text);
+        resultDesc.innerText = `${goalMinutes}분을 완주했습니다!\n총 ${totalChars}자를 작성했습니다.`;
+    } else {
+        resultDesc.innerText = '마감 몬스터를 성공적으로 물리쳤습니다.\n글이 세계를 구원했습니다.';
+    }
 
     document.body.classList.add('success-state');
     switchScreen(screenResult);

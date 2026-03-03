@@ -21,14 +21,31 @@
         </div>
 
         <form id="quest-form" class="pixel-box">
+          <!-- Quest Type Toggle -->
           <div class="form-group">
+            <label>퀘스트 목표</label>
+            <div class="quest-type-tabs">
+              <button type="button" class="quest-tab quest-tab--active" id="tab-chars">📝 목표 글자수</button>
+              <button type="button" class="quest-tab" id="tab-time">⏱️ 목표 시간</button>
+            </div>
+          </div>
+
+          <!-- Goal: Char Count -->
+          <div class="form-group" id="goal-chars-group">
             <label for="goal-words">목표 글자 수 <span class="label-hint">(최소 10자)</span></label>
-            <input type="number" id="goal-words" value="100" min="10" required />
+            <input type="number" id="goal-words" value="100" min="10" />
+          </div>
+
+          <!-- Goal: Time -->
+          <div class="form-group" id="goal-time-group" style="display:none">
+            <label for="goal-minutes">목표 시간 <span class="label-hint">(분, 최소 1분)</span></label>
+            <input type="number" id="goal-minutes" value="10" min="1" max="180" />
           </div>
 
           <div class="form-group">
             <label for="weapon-sound">무기 (타건음)</label>
             <select id="weapon-sound">
+              <option value="none">🔇 소리 없음</option>
               <option value="keyboard">⌨️ 기본 키보드</option>
               <option value="sword">⚔️ 검 휘두르기</option>
               <option value="magic">✨ 마법 발사</option>
