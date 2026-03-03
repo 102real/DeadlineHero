@@ -1,20 +1,29 @@
 @import url('https://webfontworld.github.io/gmarket/GmarketSans.css');
 
+/* ================================================
+   CSS Variables
+   ================================================ */
 :root {
   --bg-color: #0d0f12;
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
   --accent-color: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.4);
   --danger-color: #ef4444;
-  --danger-glow: rgba(239, 68, 68, 0.4);
+  --danger-glow: rgba(239, 68, 68, 0.45);
   --success-color: #10b981;
-  --panel-bg: rgba(15, 23, 42, 0.85);
+  --success-glow: rgba(16, 185, 129, 0.4);
+  --panel-bg: rgba(10, 15, 30, 0.88);
+  --panel-bg-light: rgba(15, 23, 42, 0.82);
   --border-color: #1e293b;
-  --font-family: 'GmarketSans', sans-serif;
-  --glitch-offset: 3px;
+  --border-bright: rgba(99, 102, 241, 0.3);
+  --font-family: 'GmarketSans', 'Apple SD Gothic Neo', sans-serif;
 }
 
-* {
+/* ================================================
+   Reset & Base
+   ================================================ */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -29,18 +38,21 @@ body, html {
   overflow: hidden;
 }
 
-/* Background Canvas */
+/* ================================================
+   Canvas Background
+   ================================================ */
 #bg-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
   pointer-events: none;
 }
 
-/* App Container */
+/* ================================================
+   App Container
+   ================================================ */
 #app {
   position: relative;
   width: 100%;
@@ -52,11 +64,15 @@ body, html {
   align-items: center;
 }
 
-/* Screen Management */
+/* ================================================
+   Screen Management
+   ================================================ */
 .screen {
   display: none;
   width: 100%;
   height: 100%;
+  position: absolute;
+  inset: 0;
 }
 
 .screen.active-screen {
@@ -64,45 +80,74 @@ body, html {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  animation: screenFadeIn 0.4s ease-out;
 }
 
-/* Typography & Titles */
+@keyframes screenFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================
+   Quest Screen
+   ================================================ */
+.quest-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
 .game-title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 700;
   text-align: center;
-  margin-bottom: 0.5rem;
   color: white;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 30px rgba(99, 102, 241, 0.5), 0 0 60px rgba(99, 102, 241, 0.2);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
 }
 
 .game-title span {
-  font-size: 1.5rem;
+  font-size: 0.45em;
   color: var(--accent-color);
   display: block;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  text-shadow: 0 0 15px var(--accent-glow);
 }
 
 .subtitle {
   color: var(--text-secondary);
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  letter-spacing: 0.5px;
 }
 
-/* Pixel / Game Box style */
+/* ================================================
+   Pixel Box / Panel
+   ================================================ */
 .pixel-box {
   background: var(--panel-bg);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 10px;
   padding: 2rem;
   width: 100%;
-  max-width: 500px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  max-width: 480px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.3),
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255,255,255,0.04);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.4rem;
 }
 
+/* ================================================
+   Form Elements
+   ================================================ */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -110,252 +155,511 @@ body, html {
 }
 
 label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.label-hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #64748b;
+}
+
+input[type="number"],
+select {
+  font-family: var(--font-family);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--border-color);
+  color: white;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="number"]:focus,
+select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+select option {
+  background: #0f172a;
+}
+
+/* Difficulty radio grid */
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.difficulty-option {
+  cursor: pointer;
+}
+
+.difficulty-option input[type="radio"] {
+  display: none;
+}
+
+.diff-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 0.2rem;
+}
+
+.diff-btn--hard {
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.difficulty-option input:checked + .diff-btn {
+  border-color: var(--accent-color);
+  background: rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.difficulty-option input:checked + .diff-btn--hard {
+  border-color: var(--danger-color);
+  background: rgba(239, 68, 68, 0.12);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+}
+
+.diff-btn:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.diff-name {
   font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.diff-desc {
+  font-size: 0.72rem;
   color: var(--text-secondary);
 }
 
-input, select {
-  font-family: var(--font-family);
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border-color);
-  color: white;
-  padding: 0.75rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
+/* Rules hint */
+.rules-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
 }
 
-input:focus, select:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+.rules-hint p {
+  font-size: 0.78rem;
+  color: #f87171;
+  line-height: 1.4;
 }
 
+/* ================================================
+   Buttons
+   ================================================ */
 button {
   font-family: var(--font-family);
   cursor: pointer;
-  padding: 1rem;
+  padding: 0.85rem 1.2rem;
   border: none;
-  border-radius: 4px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.18s ease;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary {
-  background: var(--accent-color);
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
-  margin-top: 1rem;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+  border: 1px solid rgba(99, 102, 241, 0.4);
 }
 
 .btn-primary:hover {
-  background: #2563eb;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
-  background: transparent;
-  border: 1px solid var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   color: var(--text-primary);
-  font-size: 0.9rem;
-  padding: 0.75rem;
+  font-size: 0.85rem;
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255,255,255,0.2);
 }
 
-/* Battle Screen / Editor */
+/* ================================================
+   Battle Screen
+   ================================================ */
 #screen-battle {
-  padding: 2rem;
-  position: relative;
+  padding: 1.5rem;
+  gap: 0;
+  justify-content: flex-start;
 }
 
-.top-hud, .bottom-hud {
+/* HUD row */
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.top-hud,
+.bottom-hud {
   width: 100%;
   max-width: 800px;
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  padding: 0.85rem 1.1rem;
   z-index: 20;
+  flex-shrink: 0;
 }
 
 .top-hud {
-  margin-bottom: 2rem;
+  margin-top: auto;
 }
 
 .bottom-hud {
-  margin-top: 2rem;
+  margin-bottom: auto;
 }
 
 .hud-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--text-secondary);
-  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
+.hud-value {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tension-value-display {
+  color: var(--accent-color);
+  font-weight: 700;
+}
+
+/* Progress bars */
 .progress-bar-container {
   width: 100%;
-  height: 12px;
-  background: #1e293b;
-  border-radius: 6px;
+  height: 10px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 5px;
   overflow: hidden;
-  position: relative;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--danger-color);
-  width: 0%;
-  transition: width 0.3s ease-out;
+  width: 100%;
+  border-radius: 5px;
+  transition: width 0.25s ease-out;
+}
+
+.boss-fill {
+  background: linear-gradient(90deg, #dc2626, #ef4444, #f87171);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 .tension-fill {
-  background: var(--accent-color);
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
   width: 0%;
+  transition: width 0.15s ease-out;
 }
 
-.hud-value {
-  font-size: 0.9rem;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-.editor-container {
-  flex-grow: 1;
+/* ================================================
+   Idle Timer Bar
+   ================================================ */
+#idle-timer-container {
   width: 100%;
   max-width: 800px;
-  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+#idle-timer-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+#idle-timer-bar {
+  height: 100%;
+  width: 0%;
+  background: #3b82f6;
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+
+#idle-timer-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  min-width: 44px;
+  text-align: right;
+  transition: color 0.3s;
+}
+
+/* ================================================
+   Editor
+   ================================================ */
+.editor-container {
+  flex: 1;
+  width: 100%;
+  max-width: 800px;
   position: relative;
   z-index: 20;
+  padding: 0.4rem 0;
+  min-height: 0;
 }
 
 #text-editor {
   width: 100%;
   height: 100%;
-  min-height: 400px;
-  background: rgba(0, 0, 0, 0.3);
+  min-height: 280px;
+  background: rgba(5, 10, 20, 0.55);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 2rem;
-  color: white;
-  font-size: 1.25rem;
-  line-height: 1.6;
+  padding: 1.5rem 1.8rem;
+  color: #e2e8f0;
+  font-size: 1.2rem;
+  font-family: var(--font-family);
+  line-height: 1.7;
   outline: none;
   overflow-y: auto;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(99, 102, 241, 0.08);
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-word;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  caret-color: #60a5fa;
 }
 
-#text-editor:empty:before {
+#text-editor:focus {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(99, 102, 241, 0.15),
+    0 0 20px rgba(59, 130, 246, 0.08);
+}
+
+#text-editor:empty::before {
   content: attr(placeholder);
-  color: var(--text-secondary);
+  color: #334155;
   pointer-events: none;
 }
 
-/* Warnings and Glitches */
+/* ================================================
+   Warning States (body class controls)
+   ================================================ */
 #warning-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   pointer-events: none;
-  z-index: 15;
-  box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0);
-  transition: box-shadow 0.2s ease;
+  z-index: 50;
+  box-shadow: inset 0 0 0 0 transparent;
+  transition: box-shadow 0.2s;
 }
 
+/* Warning Level 1: 5-7s idle — red vignette pulse */
 .warning-level-1 #warning-overlay {
-  box-shadow: inset 0 0 100px 10px rgba(239, 68, 68, 0.5);
-  animation: heartbeat 1s infinite alternate;
+  animation: warningPulse1 0.9s ease-in-out infinite alternate;
 }
 
+/* Warning Level 2: 7s+ idle — intense red + glitch */
 .warning-level-2 #warning-overlay {
-  box-shadow: inset 0 0 150px 30px rgba(239, 68, 68, 0.8);
-  animation: heartbeat 0.5s infinite alternate;
+  animation: warningPulse2 0.45s ease-in-out infinite alternate;
 }
 
 .warning-level-2 #text-editor {
-  animation: glitch-anim 0.2s infinite alternate;
-  color: var(--danger-color);
-  text-shadow: 2px 0 blue, -2px 0 red;
+  animation: glitchShake 0.15s infinite;
+  color: #fca5a5;
+  text-shadow: 2px 0 #3b82f6, -2px 0 #ef4444;
 }
 
-@keyframes heartbeat {
-  0% { opacity: 0.5; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.02); }
+.warning-level-2 #idle-timer-label {
+  color: #ef4444;
+  animation: labelBlink 0.3s infinite;
 }
 
-@keyframes glitch-anim {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
+@keyframes warningPulse1 {
+  0%   { box-shadow: inset 0 0 80px 5px rgba(239, 68, 68, 0.3); }
+  100% { box-shadow: inset 0 0 140px 20px rgba(239, 68, 68, 0.55); }
 }
 
-/* Shatter Effect setup */
+@keyframes warningPulse2 {
+  0%   { box-shadow: inset 0 0 120px 20px rgba(239, 68, 68, 0.65); }
+  100% { box-shadow: inset 0 0 200px 50px rgba(239, 68, 68, 0.88); }
+}
+
+@keyframes glitchShake {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-2px, 1px); }
+  40%  { transform: translate(-1px, -2px); }
+  60%  { transform: translate(2px, 1px); }
+  80%  { transform: translate(1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes labelBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ================================================
+   Shatter Effect
+   ================================================ */
 .shatter-char {
-  position: absolute;
+  position: fixed;
   display: inline-block;
   will-change: transform, opacity;
+  pointer-events: none;
+  z-index: 100;
+  font-family: var(--font-family);
 }
 
-/* Result Screen */
+/* ================================================
+   Success State
+   ================================================ */
+.success-state #text-editor {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* ================================================
+   Result Screen
+   ================================================ */
 .result-box {
   text-align: center;
+  max-width: 500px;
 }
 
 #result-title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
   color: var(--danger-color);
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 20px var(--danger-glow);
 }
 
 .success-state #result-title {
   color: var(--success-color);
+  text-shadow: 0 0 20px var(--success-glow);
 }
 
 #result-desc {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
 #surviving-text-container {
-  background: rgba(0,0,0,0.5);
-  padding: 1rem;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
   text-align: left;
-  margin-bottom: 2rem;
-  max-height: 200px;
+  margin-bottom: 1.5rem;
+  max-height: 160px;
   overflow-y: auto;
 }
 
-#surviving-text {
-  font-style: italic;
+.surviving-label {
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--text-secondary);
-  margin-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 0.5rem;
+}
+
+#surviving-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .result-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .result-actions button {
   flex: 1;
-  min-width: 140px;
+  min-width: 130px;
+}
+
+/* ================================================
+   Mobile Responsive
+   ================================================ */
+@media (max-width: 600px) {
+  #screen-battle {
+    padding: 0.75rem;
+  }
+
+  .pixel-box {
+    padding: 1.4rem;
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  #text-editor {
+    font-size: 1rem;
+    padding: 1rem;
+    min-height: 200px;
+  }
+
+  .top-hud, .bottom-hud {
+    padding: 0.65rem 0.9rem;
+  }
+
+  .game-title {
+    font-size: 2.2rem;
+  }
 }

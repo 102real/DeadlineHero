@@ -5,75 +5,104 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>마감용사 (Deadline Hero)</title>
-    <!-- G-Market Sans for Game-like UI -->
     <link href="https://webfontworld.github.io/gmarket/GmarketSans.css" rel="stylesheet">
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <!-- Background Canvas for 2D Graphics -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- UI Overlay container -->
     <div id="app">
-      
-      <!-- SCREEN 1: Quest Setup (Landing Page) -->
+
+      <!-- SCREEN 1: Quest Setup -->
       <section id="screen-quest" class="screen active-screen">
-        <h1 class="game-title">마감용사<br><span>Deadline Hero</span></h1>
-        <p class="subtitle">당신의 타자가 세상을 구원합니다.</p>
-        
+        <div class="quest-header">
+          <h1 class="game-title">마감용사<br><span>Deadline Hero</span></h1>
+          <p class="subtitle">당신의 타자가 세상을 구원합니다.</p>
+        </div>
+
         <form id="quest-form" class="pixel-box">
           <div class="form-group">
-            <label for="goal-words">목표 글자 수 (최소 10자)</label>
+            <label for="goal-words">목표 글자 수 <span class="label-hint">(최소 10자)</span></label>
             <input type="number" id="goal-words" value="100" min="10" required />
           </div>
-          
+
           <div class="form-group">
             <label for="weapon-sound">무기 (타건음)</label>
             <select id="weapon-sound">
-              <option value="keyboard">기본 키보드</option>
-              <option value="sword">검 휘두르기</option>
-              <option value="magic">마법 발사</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="difficulty">난이도 설정</label>
-            <select id="difficulty">
-              <option value="normal">일반 모드 (10초 자비)</option>
-              <option value="hardcore">하드코어 (5초 자비)</option>
+              <option value="keyboard">⌨️ 기본 키보드</option>
+              <option value="sword">⚔️ 검 휘두르기</option>
+              <option value="magic">✨ 마법 발사</option>
             </select>
           </div>
 
-          <button type="submit" class="btn-primary">전장으로 입장</button>
+          <div class="form-group">
+            <label>난이도</label>
+            <div class="difficulty-grid">
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" id="diff-normal" value="normal" checked>
+                <span class="diff-btn">
+                  <span class="diff-name">일반</span>
+                  <span class="diff-desc">10초 자비</span>
+                </span>
+              </label>
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" id="diff-hardcore" value="hardcore">
+                <span class="diff-btn diff-btn--hard">
+                  <span class="diff-name">하드코어</span>
+                  <span class="diff-desc">5초 자비</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="rules-hint">
+            <span>⚠️</span>
+            <p>입력 멈춤 또는 창 이탈 시 글이 파괴됩니다</p>
+          </div>
+
+          <button type="submit" class="btn-primary">⚔️ 전장으로 입장</button>
         </form>
       </section>
 
-      <!-- SCREEN 2: Battle (Editor) -->
+      <!-- SCREEN 2: Battle -->
       <section id="screen-battle" class="screen">
-        <!-- Top: Boss HP -->
+        <!-- Boss HP Bar -->
         <div class="top-hud">
-          <div class="hud-label">마감 몬스터 체력</div>
-          <div class="progress-bar-container">
-            <div id="boss-hp-bar" class="progress-bar-fill"></div>
+          <div class="hud-row">
+            <span class="hud-label">💀 마감 몬스터 체력</span>
+            <span id="progress-text" class="hud-value">0 / 100 자</span>
           </div>
-          <div id="progress-text" class="hud-value">0 / 100 자</div>
+          <div class="progress-bar-container">
+            <div id="boss-hp-bar" class="progress-bar-fill boss-fill"></div>
+          </div>
         </div>
-        
-        <!-- Center: Text Editor -->
+
+        <!-- Idle Timer Bar (남은 시간 시각화) -->
+        <div id="idle-timer-container">
+          <div id="idle-timer-track">
+            <div id="idle-timer-bar"></div>
+          </div>
+          <span id="idle-timer-label">안전</span>
+        </div>
+
+        <!-- Editor -->
         <div class="editor-container">
-          <div id="text-editor" contenteditable="true" placeholder="세계의 운명이 당신의 손가락에 달렸습니다. 타자를 시작하세요..."></div>
+          <div id="text-editor" contenteditable="true" placeholder="세계의 운명이 당신의 손가락에 달렸습니다. 지금 타자를 시작하세요..."></div>
         </div>
 
-        <!-- Warning HUD (붉은 점멸, 심장박동 등 상태 표시) -->
-        <div id="warning-overlay" class="warning-hidden"></div>
-
-        <!-- Bottom: Tension Meter -->
+        <!-- Tension Meter -->
         <div class="bottom-hud">
-          <div class="hud-label">텐션 미터 (콤보)</div>
+          <div class="hud-row">
+            <span class="hud-label">⚡ 텐션</span>
+            <span id="tension-value" class="hud-value tension-value-display">0%</span>
+          </div>
           <div class="progress-bar-container tension-container">
             <div id="tension-bar" class="progress-bar-fill tension-fill"></div>
           </div>
         </div>
+
+        <!-- Warning vignette overlay -->
+        <div id="warning-overlay"></div>
       </section>
 
       <!-- SCREEN 3: Result -->
@@ -81,14 +110,16 @@
         <div class="pixel-box result-box">
           <h2 id="result-title">게임 오버</h2>
           <p id="result-desc">용사가 전장을 이탈하여 세계가 멸망했습니다.</p>
+
           <div id="surviving-text-container">
-            <p><strong>생존한 텍스트:</strong></p>
-            <blockquote id="surviving-text">몇 글자 간신히 주워 담았습니다...</blockquote>
+            <p class="surviving-label">생존한 텍스트</p>
+            <blockquote id="surviving-text">...</blockquote>
           </div>
+
           <div class="result-actions">
-            <button id="btn-copy" class="btn-secondary">텍스트 복사</button>
-            <button id="btn-download" class="btn-secondary">.txt 다운로드</button>
-            <button id="btn-retry" class="btn-primary">다시 도전하기</button>
+            <button id="btn-copy" class="btn-secondary">📋 텍스트 복사</button>
+            <button id="btn-download" class="btn-secondary">💾 .txt 다운로드</button>
+            <button id="btn-retry" class="btn-primary">🔄 다시 도전</button>
           </div>
         </div>
       </section>
