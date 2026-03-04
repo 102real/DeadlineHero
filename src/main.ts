@@ -13,6 +13,11 @@ const goalInput = document.getElementById('goal-words') as HTMLInputElement;
 const goalMinutesInput = document.getElementById('goal-minutes') as HTMLInputElement;
 const weaponSelect = document.getElementById('weapon-sound') as HTMLSelectElement;
 
+const focusLockCheckbox = document.getElementById('focus-lock') as HTMLInputElement;
+const focusLockLabel = document.getElementById('focus-lock-label') as HTMLElement;
+const focusLockDesc = document.getElementById('focus-lock-desc') as HTMLElement;
+const rulesHintText = document.getElementById('rules-hint-text') as HTMLElement;
+
 const tabChars = document.getElementById('tab-chars') as HTMLButtonElement;
 const tabTime = document.getElementById('tab-time') as HTMLButtonElement;
 const goalCharsGroup = document.getElementById('goal-chars-group') as HTMLElement;
@@ -51,6 +56,7 @@ let currentWords = 0;
 let tension = 0;
 let maxIdleTime = 10000;
 
+let focusLockEnabled = true;
 let lastTypeTime = 0;
 let timerInterval: number | null = null;
 let savedText = '';
@@ -109,6 +115,20 @@ function setQuestType(type: QuestType) {
 
 tabChars.addEventListener('click', () => setQuestType('chars'));
 tabTime.addEventListener('click', () => setQuestType('time'));
+
+// ================================================
+// Focus Lock Toggle
+// ================================================
+function updateFocusLockUI() {
+    const on = focusLockCheckbox.checked;
+    focusLockLabel.textContent = on ? '창 이탈 시 즉사' : '창 이탈 허용';
+    focusLockDesc.textContent = on ? '창을 벗어나면 즉시 패배합니다' : '창 전환이 허용됩니다';
+    rulesHintText.textContent = on
+        ? '입력 멈춤 또는 창 이탈 시 글이 파괴됩니다'
+        : '입력이 멈추면 글이 파괴됩니다 (창 이탈 허용됨)';
+}
+
+focusLockCheckbox.addEventListener('change', updateFocusLockUI);
 
 // ================================================
 // Timer Bar Update
@@ -188,6 +208,7 @@ function startGame(e: Event) {
     targetWords = parseInt(goalInput.value) || 100;
     goalMinutes = Math.max(1, parseInt(goalMinutesInput.value) || 10);
     maxIdleTime = getDifficultyValue() === 'hardcore' ? 5000 : 10000;
+    focusLockEnabled = focusLockCheckbox.checked;
     gameStartTime = Date.now();
 
     currentWords = 0;
@@ -300,7 +321,7 @@ function handleTyping() {
 // Focus Lock
 // ================================================
 window.addEventListener('blur', () => {
-    if (currentState === 'playing') {
+    if (currentState === 'playing' && focusLockEnabled) {
         currentState = 'gameover';
         triggerShatterEffect();
         setTimeout(() => gameOver('focus_lost'), 2000);
